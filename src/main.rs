@@ -18,10 +18,11 @@ fn main() -> Result<()> {
         .next()
         .ok_or(anyhow::anyhow!("no path supplied"))?;
 
+    // read metadata from file
     let metadata = parquet_metadata(&path)?;
 
-    let num_rows = metadata.num_rows;
-    println!("File '{}' has {} rows", path, num_rows);
+    // Show some file attributes
+    println!("File '{}' has {} rows", &path, metadata.num_rows);
     for column_metadata in metadata.row_groups[0].columns() {
         println!("---------");
         println!("column: '{}'", column_metadata.descriptor().path_in_schema[0]);
