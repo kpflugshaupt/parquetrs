@@ -1,12 +1,12 @@
 use anyhow::{Context, Result};
-use parquet2::read::read_metadata;
+use parquet2::{metadata, read as parquet};
 use std::env;
 use std::fs::File;
 
-fn parquet_metadata(path: &str) -> Result<parquet2::metadata::FileMetaData> {
+fn parquet_metadata(path: &str) -> Result<metadata::FileMetaData> {
     let mut reader =
         File::open(&path).with_context(|| format!("could not open file '{}'", &path))?;
-    let metadata = read_metadata(&mut reader)
+    let metadata = parquet::read_metadata(&mut reader)
         .with_context(|| format!("could not read Parquet metadata from file '{}'", &path));
     metadata
 }
