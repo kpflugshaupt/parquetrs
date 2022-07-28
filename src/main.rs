@@ -1,11 +1,14 @@
-use anyhow::{Context, Result};
-use parquet2::{metadata, read as parquet};
 use std::env;
 use std::fs::File;
+use std::io::BufReader;
+
+use anyhow::{Context, Result};
+use parquet2::{metadata, read as parquet};
 
 fn parquet_metadata(path: &str) -> Result<metadata::FileMetaData> {
-    let mut reader =
-        File::open(&path).with_context(|| format!("could not open file '{}'", &path))?;
+    let mut reader = BufReader::new(
+        File::open(&path).with_context(|| format!("could not open file '{}'", &path))?,
+    );
     let metadata = parquet::read_metadata(&mut reader)
         .with_context(|| format!("could not read Parquet metadata from file '{}'", &path));
     metadata
@@ -25,7 +28,10 @@ fn main() -> Result<()> {
     println!("File '{}' has {} rows", &path, metadata.num_rows);
     for column_metadata in metadata.row_groups[0].columns() {
         println!("---------");
-        println!("column: '{}'", column_metadata.descriptor().path_in_schema[0]);
+        println!(
+            "column: '{}'",
+            column_metadata.descriptor().path_in_schema[0]
+        );
         println!("type: {:#?}", column_metadata.descriptor().base_type);
     }
     Ok(())
