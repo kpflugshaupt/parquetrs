@@ -9,17 +9,15 @@ fn parquet_metadata(path: &str) -> Result<metadata::FileMetaData> {
     let mut reader = BufReader::new(
         File::open(&path).with_context(|| format!("could not open file '{}'", &path))?,
     );
-    let metadata = parquet::read_metadata(&mut reader)
-        .with_context(|| format!("could not read Parquet metadata from file '{}'", &path));
-    metadata
+    parquet::read_metadata(&mut reader)
+        .with_context(|| format!("could not read Parquet metadata from file '{}'", &path))
 }
 
 fn main() -> Result<()> {
     // get Parquet file path from 1st argument
     let path = env::args()
-        .skip(1)
-        .next()
-        .ok_or(anyhow::anyhow!("no path supplied"))?;
+        .nth(1)
+        .ok_or_else(|| anyhow::anyhow!("no path supplied"))?;
 
     // read metadata from file
     let metadata = parquet_metadata(&path)?;
